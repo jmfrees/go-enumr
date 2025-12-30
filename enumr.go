@@ -55,14 +55,16 @@ func main() {
 		os.Exit(1)
 	}
 
-	for _, typeName := range typs {
-		fmt.Println("main#typs")
-		// Process the loaded package and files
-		err = enumr.ProcessPackage(pkg, typeName, nameFormat)
-		if err != nil {
-			fmt.Printf("Error processing file: %v\n", err)
-			os.Exit(1)
-		}
+	outputName := ""
+	if output != nil {
+		outputName = *output
+	}
+
+	// Process the loaded package and files
+	err = enumr.ProcessPackage(pkg, typs, nameFormat, outputName)
+	if err != nil {
+		fmt.Printf("Error processing file: %v\n", err)
+		os.Exit(1)
 	}
 
 	fmt.Println("Enum generation completed successfully!")
