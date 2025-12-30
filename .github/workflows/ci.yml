@@ -32,11 +32,14 @@ jobs:
           exit 1
         fi
 
-    - name: Run Go Vet
-      run: go vet ./...
+    - name: Build Generator
+      run: go build -o enumr .
 
     - name: Run Go Generate
       run: go generate ./...
+
+    - name: Run Go Vet
+      run: go vet ./...
 
     - name: Verify Clean Generation
       # Ensures that the generated code is up-to-date and deterministic.
