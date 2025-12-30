@@ -16,6 +16,8 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+var logger = slog.New(slog.NewTextHandler(os.Stdout, nil))
+
 // EnumData is used to pass the necessary data to the template.
 type EnumData struct {
 	PackageName string
@@ -95,11 +97,10 @@ func ProcessPackage(
 	}
 
 	// Write the generated source to a file
-	if err := os.WriteFile(outFileName, source, 0o600); err != nil {
+	if err = os.WriteFile(outFileName, source, 0o644); err != nil {
 		return fmt.Errorf("failed to write file %s: %w", outFileName, err)
 	}
 
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	logger.Info("Enum code generated successfully", "file", outFileName)
 
 	return nil
@@ -168,6 +169,11 @@ func collectVarsOfType(valueSpec *ast.ValueSpec, typeName string, instances *[]I
 
 		// Check if the type of the literal matches the target typeName
 		if typeIdent, okIdent := v.Type.(*ast.Ident); okIdent && typeIdent.Name == typeName {
+			// Ensure we don't go out of bounds if Names is shorter
+			// than Values (though unlikely in valid code).
+			if i >= len(valueSpec.Names) {
+				continue
+			}
 			// Add the instance name to the list
 			*instances = append(*instances, InstanceData{
 				Name: valueSpec.Names[i].Name,
@@ -220,6 +226,10 @@ func toPascalCase(name string) string {
 		return r == '_' || r == ' '
 	})
 
+	if len(words) == 0 {
+		return ""
+	}
+
 	// Capitalize every word
 	for i := range words {
 		words[i] = capitalize(words[i])
@@ -250,6 +260,10 @@ func toTitleCase(name string) string {
 		return r == '_' || r == ' '
 	})
 
+	if len(words) == 0 {
+		return ""
+	}
+
 	for i := range words {
 		words[i] = capitalize(words[i])
 	}
@@ -273,7 +287,6 @@ func generateEnumSource(
 	packageName string,
 	enums []EnumInfo,
 ) ([]byte, error) {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	logger.Info("generating")
 
 	// Create the template object with a function map for name transformations
@@ -305,12 +318,12 @@ func (t {{.TypeName}}) String() string {
 	return ""
 }
 
-// MarshalText converts the enum value to a string
+// MarshalText converts the enum value to a string.
 func (t {{.TypeName}}) MarshalText() (text []byte, err error) {
 	return []byte(t.String()), nil
 }
 
-// UnmarshalText converts a string to the appropriate enum value
+// UnmarshalText converts a string to the appropriate enum value.
 func (t *{{.TypeName}}) UnmarshalText(text []byte) error {
 	trimmedText := strings.ReplaceAll(strings.ToLower(string(text)), "\"", "")
 	switch trimmedText {
@@ -319,7 +332,7 @@ func (t *{{.TypeName}}) UnmarshalText(text []byte) error {
 		*t = {{.Name}}
 	{{end}}
 	default:
-		return fmt.Errorf("unsupported type")
+		return fmt.Errorf("unknown enum value: %q", trimmedText)
 	}
 	return nil
 }

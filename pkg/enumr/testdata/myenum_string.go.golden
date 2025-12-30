@@ -22,12 +22,12 @@ func (t MyEnum) String() string {
 	return ""
 }
 
-// MarshalText converts the enum value to a string
+// MarshalText converts the enum value to a string.
 func (t MyEnum) MarshalText() (text []byte, err error) {
 	return []byte(t.String()), nil
 }
 
-// UnmarshalText converts a string to the appropriate enum value
+// UnmarshalText converts a string to the appropriate enum value.
 func (t *MyEnum) UnmarshalText(text []byte) error {
 	trimmedText := strings.ReplaceAll(strings.ToLower(string(text)), "\"", "")
 	switch trimmedText {
@@ -39,7 +39,7 @@ func (t *MyEnum) UnmarshalText(text []byte) error {
 		*t = ValueTwo
 	
 	default:
-		return fmt.Errorf("unsupported type")
+		return fmt.Errorf("unknown enum value: %q", trimmedText)
 	}
 	return nil
 }
