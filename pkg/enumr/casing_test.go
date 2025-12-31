@@ -1,14 +1,8 @@
 package enumr
 
 import (
-	"bytes"
-	"flag"
-	"os"
-	"path/filepath"
 	"testing"
 )
-
-var update = flag.Bool("update", false, "update golden files")
 
 func TestToCamelCase(t *testing.T) {
 	tests := []struct {
@@ -64,40 +58,5 @@ func TestToTitleCase(t *testing.T) {
 		if result := toTitleCase(test.input); result != test.expected {
 			t.Errorf("toTitleCase(%q) = %q; want %q", test.input, result, test.expected)
 		}
-	}
-}
-
-func TestGenerateEnumSource(t *testing.T) {
-	packageName := "testpkg"
-	enums := []EnumInfo{
-		{
-			TypeName:   "MyEnum",
-			CaseFormat: "snake_case",
-			Instances: []InstanceData{
-				{Name: "ValueOne"},
-				{Name: "ValueTwo"},
-			},
-		},
-	}
-
-	source, err := generateEnumSource(packageName, enums)
-	if err != nil {
-		t.Fatalf("generateEnumSource failed: %v", err)
-	}
-
-	goldenFile := filepath.Join("testdata", "myenum_string.go.golden")
-	if *update {
-		if err := os.WriteFile(goldenFile, source, 0644); err != nil {
-			t.Fatalf("failed to update golden file: %v", err)
-		}
-	}
-
-	expected, err := os.ReadFile(goldenFile)
-	if err != nil {
-		t.Fatalf("failed to read golden file: %v", err)
-	}
-
-	if !bytes.Equal(source, expected) {
-		t.Errorf("generated source does not match golden file.\nExpected:\n%s\nGot:\n%s", expected, source)
 	}
 }

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,21 +14,22 @@ import (
 	"github.com/jmfrees/go-enumr/pkg/enumr"
 )
 
-var (
-	typeNames = flag.String("type", "", "comma-separated list type(s) to generate for (required)")
-	format    = flag.String("format", "", "format of the name for each enum instance (default: \"\")")
-	output    = flag.String("output", "", "output file name (default: dir/<type>_string.go)")
-)
-
 func main() {
+	typeNames := flag.String("type", "", "comma-separated list type(s) to generate for (required)")
+	format := flag.String("format", "", "format of the name for each enum instance (default: \"\")")
+	output := flag.String("output", "", "output file name (default: dir/<type>_enum.go)")
+
 	flag.Parse()
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+	ctx := context.Background()
 
 	// Ensure the -type argument is provided
 	if len(*typeNames) == 0 {
-		fmt.Println("Error: -type argument is required")
+		logger.Error("argument is required", "arg", "-type")
 		os.Exit(2)
 	}
-	typs := strings.Split(*typeNames, ",")
+	targetTypes := strings.Split(*typeNames, ",")
 
 	args := flag.Args()
 	if len(args) == 0 {
@@ -37,7 +39,7 @@ func main() {
 
 	var dir string
 
-	if len(args) == 1 && isDirectory(args[0]) {
+	if len(args) == 1 && isDirectory(args[0], logger) {
 		dir = args[0]
 	} else {
 		dir = filepath.Dir(args[0])
@@ -51,7 +53,12 @@ func main() {
 	// Load the package
 	pkg, err := loadPackageFromDir(dir)
 	if err != nil {
-		fmt.Printf("Error loading package: %v\n", err)
+		logger.LogAttrs(
+			ctx,
+			slog.LevelError,
+			"Error loading package",
+			slog.Any("error", err),
+		)
 		os.Exit(1)
 	}
 
@@ -61,13 +68,18 @@ func main() {
 	}
 
 	// Process the loaded package and files
-	err = enumr.ProcessPackage(pkg, typs, nameFormat, outputName)
+	generator := enumr.NewGenerator(logger)
+	err = generator.Generate(ctx, pkg, targetTypes, nameFormat, outputName)
 	if err != nil {
-		fmt.Printf("Error processing file: %v\n", err)
+		logger.Error("Error processing file", "error", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Enum generation completed successfully!")
+	logger.LogAttrs(
+		ctx,
+		slog.LevelInfo,
+		"Enum generation completed successfully",
+	)
 }
 
 func loadPackageFromDir(dir string) (*packages.Package, error) {
@@ -77,23 +89,24 @@ func loadPackageFromDir(dir string) (*packages.Package, error) {
 	}
 
 	// Load all Go files in the directory
-	pkgs, err := packages.Load(cfg, dir)
+	packagesList, err := packages.Load(cfg, dir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load package from directory %s: %w", dir, err)
 	}
 
-	if len(pkgs) == 0 {
+	if len(packagesList) == 0 {
 		return nil, fmt.Errorf("no packages found in directory %s", dir)
 	}
 
-	return pkgs[0], nil
+	return packagesList[0], nil
 }
 
 // isDirectory reports whether the named file is a directory.
-func isDirectory(name string) bool {
+func isDirectory(name string, logger *slog.Logger) bool {
 	info, err := os.Stat(name)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("Error checking directory", "error", err)
+		os.Exit(1)
 	}
 	return info.IsDir()
 }
