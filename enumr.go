@@ -17,7 +17,7 @@ import (
 func main() {
 	typeNames := flag.String("type", "", "comma-separated list type(s) to generate for (required)")
 	format := flag.String("format", "", "format of the name for each enum instance (default: \"\")")
-	output := flag.String("output", "", "output file name (default: dir/<type>_enum.go)")
+	output := flag.String("output", "", "output file name or directory (default: dir/<type>_enum.go)")
 
 	flag.Parse()
 

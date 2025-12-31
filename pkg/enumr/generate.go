@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"golang.org/x/tools/go/packages"
 )
@@ -91,15 +90,17 @@ func (g *Generator) Generate(
 
 // getOutputFilename determines the output filename based on the directory, type name, and output flag.
 func getOutputFilename(dir, firstType, output string) string {
-	if output != "" {
-		// If output is a directory, join with default filename
-		if info, err := os.Stat(output); err == nil && info.IsDir() {
-			return filepath.Join(output, fmt.Sprintf("%s_enum.go", strings.ToLower(firstType)))
-		}
-		return output
+	if output == "" {
+		// Default: <first_type>_enum.go in the package directory
+		return filepath.Join(dir, fmt.Sprintf("%s_enum.go", toSnakeCase(firstType)))
 	}
-	// Default: <first_type>_enum.go in the package directory
-	return filepath.Join(dir, fmt.Sprintf("%s_enum.go", strings.ToLower(firstType)))
+
+	// If output is a directory, join with default filename
+	if info, err := os.Stat(output); err == nil && info.IsDir() {
+		return filepath.Join(output, fmt.Sprintf("%s_enum.go", toSnakeCase(firstType)))
+	}
+
+	return output
 }
 
 // resolveInstances determines the instances for a type, prioritizing directives over manual scanning.

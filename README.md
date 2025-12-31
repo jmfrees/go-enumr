@@ -139,7 +139,7 @@ The tool generates the following for your type:
   - `PascalCase`
   - `SNAKE_CASE`
   - `Title Case`
-- `-output`: (Optional) Output file name. Defaults to `<type>_enum.go`.
+- `-output`: (Optional) Output file name or directory. Defaults to `<type>_enum.go` in the package directory.
 
 ## Best Practices
 
