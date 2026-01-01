@@ -40,32 +40,39 @@ func TestParseDirectives(t *testing.T) {
 	}
 
 	tests := []struct {
-		name      string
-		directive string
-		wantCount int
-		wantName  string
-		wantInit  string
+		name       string
+		directive  string
+		wantCount  int
+		wantName   string
+		wantFields map[string]string
 	}{
 		{
 			name:      "Full fields",
 			directive: "//enumr:Item1 Code:I1 Desc:\"Item One\" IsActive:true",
 			wantCount: 1,
 			wantName:  "Item1",
-			wantInit:  "Code: \"I1\", Desc: \"Item One\", IsActive: true",
+			wantFields: map[string]string{
+				"Code":     "\"I1\"",
+				"Desc":     "\"Item One\"",
+				"IsActive": "true",
+			},
 		},
 		{
 			name:      "Partial fields",
 			directive: "// enumr:Item2 Code:I2 Desc:ItemTwo",
 			wantCount: 1,
 			wantName:  "Item2",
-			wantInit:  "Code: \"I2\", Desc: \"ItemTwo\"",
+			wantFields: map[string]string{
+				"Code": "\"I2\"",
+				"Desc": "\"ItemTwo\"",
+			},
 		},
 		{
 			name:      "No fields",
 			directive: "// enumr:Item3",
 			wantCount: 1,
 			wantName:  "Item3",
-			wantInit:  "",
+			wantFields: map[string]string{},
 		},
 		{
 			name:      "Ignored comment",
@@ -77,35 +84,46 @@ func TestParseDirectives(t *testing.T) {
 			directive: "//enumr:Item4 Int:42 Float:3.14",
 			wantCount: 1,
 			wantName:  "Item4",
-			wantInit:  "Int: 42, Float: 3.14",
+			wantFields: map[string]string{
+				"Int":   "42",
+				"Float": "3.14",
+			},
 		},
 		{
 			name:      "Slice no spaces",
 			directive: "//enumr:Item5 Slice:[]string{\"a\",\"b\"}",
 			wantCount: 1,
 			wantName:  "Item5",
-			wantInit:  "Slice: []string{\"a\",\"b\"}",
+			wantFields: map[string]string{
+				"Slice": "[]string{\"a\",\"b\"}",
+			},
 		},
 		{
 			name:      "Slice with spaces (quoted)",
 			directive: "//enumr:Item6 Slice:\"[]string{\\\"a\\\", \\\"b\\\"}\"",
 			wantCount: 1,
 			wantName:  "Item6",
-			wantInit:  "Slice: []string{\"a\", \"b\"}",
+			wantFields: map[string]string{
+				"Slice": "[]string{\"a\", \"b\"}",
+			},
 		},
 		{
 			name:      "Constant reference",
 			directive: "//enumr:Item7 Const:SomeConstant",
 			wantCount: 1,
 			wantName:  "Item7",
-			wantInit:  "Const: SomeConstant",
+			wantFields: map[string]string{
+				"Const": "SomeConstant",
+			},
 		},
 		{
 			name:      "Quoted string with spaces",
 			directive: "//enumr:Item8 Desc:\"two words\"",
 			wantCount: 1,
 			wantName:  "Item8",
-			wantInit:  "Desc: \"two words\"",
+			wantFields: map[string]string{
+				"Desc": "\"two words\"",
+			},
 		},
 	}
 
@@ -128,9 +146,8 @@ func TestParseDirectives(t *testing.T) {
 				if inst.Name != tt.wantName {
 					t.Errorf("Name = %q; want %q", inst.Name, tt.wantName)
 				}
-				gotInit := renderInit(inst, fields)
-				if gotInit != tt.wantInit {
-					t.Errorf("Init = %q; want %q", gotInit, tt.wantInit)
+				if !reflect.DeepEqual(inst.Fields, tt.wantFields) {
+					t.Errorf("Fields = %v; want %v", inst.Fields, tt.wantFields)
 				}
 			}
 		})
