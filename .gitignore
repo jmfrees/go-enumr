@@ -28,4 +28,4 @@ go.work.sum
 *_enum.go
 
 # generated binary
-./enumr
+/enumr
