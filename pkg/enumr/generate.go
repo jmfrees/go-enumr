@@ -58,7 +58,7 @@ func (g *Generator) Generate(
 
 	g.Logger.LogAttrs(
 		ctx,
-		slog.LevelInfo,
+		slog.LevelDebug,
 		"Generating enum source",
 		slog.String("package", pkg.Name),
 		slog.Any("types", typeNames),
@@ -80,7 +80,7 @@ func (g *Generator) Generate(
 
 	g.Logger.LogAttrs(
 		ctx,
-		slog.LevelInfo,
+		slog.LevelDebug,
 		"Enum code generated successfully",
 		slog.String("file", outFileName),
 	)

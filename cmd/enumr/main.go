@@ -77,7 +77,7 @@ func main() {
 
 	logger.LogAttrs(
 		ctx,
-		slog.LevelInfo,
+		slog.LevelDebug,
 		"Enum generation completed successfully",
 	)
 }
