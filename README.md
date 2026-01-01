@@ -124,16 +124,17 @@ var (
 
 The tool generates the following for your type:
 
-- `func (t Type) String() string`: Returns the enum name (e.g., "credit_card").
+- `func (t Type) String() string`: Returns the enum name (e.g., "credit_card") or the value of the field specified by `-name-field`.
 - `func (t Type) MarshalText() ([]byte, error)`: Implements `encoding.TextMarshaler`.
-- `func (t *Type) UnmarshalText([]byte) error`: Implements `encoding.TextUnmarshaler`. Matches the string representation exactly (case-sensitive).
+- `func (t *Type) UnmarshalText([]byte) error`: Implements `encoding.TextUnmarshaler`. Matches the string representation exactly.
 - `func TypeValues() []Type`: Returns a slice of all enum instances.
 - `func ParseType(s string) (Type, error)`: Helper to parse a string into an enum instance.
 
 ## CLI Options
 
 - `-type`: (Required) Comma-separated list of type names to generate code for.
-- `-format`: (Optional) Casing format for the string representation.
+- `-name-field`: (Optional) The name of the struct field to use for the string representation (e.g., `Code`). If not provided, the enum instance name is used (transformed by `-format`).
+- `-format`: (Optional) Casing format for the string representation (ignored if `-name-field` is used).
   - (empty) (default): Preserves the original casing.
   - `snake_case`
   - `camelCase`
