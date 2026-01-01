@@ -40,7 +40,7 @@ var (
 ## Installation
 
 ```bash
-go install github.com/jmfrees/go-enumr@latest
+go install github.com/jmfrees/go-enumr/cmd/enumr@latest
 ```
 
 ## Usage
