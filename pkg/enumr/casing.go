@@ -26,39 +26,29 @@ func transformName(format string) func(string) string {
 
 // toCamelCase converts a name to camelCase.
 func toCamelCase(name string) string {
-	// If the name is PascalCase (no underscores or spaces), convert to snake_case first
-	if !strings.ContainsAny(name, "_ ") {
-		name = toSnakeCase(name)
-	}
-
-	// Split by underscores or spaces and lower case the first letter of each word after the first
-	words := strings.FieldsFunc(name, func(r rune) bool {
-		return r == '_' || r == ' '
-	})
-
+	words := splitIntoWords(name)
 	if len(words) == 0 {
 		return ""
 	}
 
-	// Convert first word to lowercase, others to title case
+	// Lowercase the first word
+	words[0] = strings.ToLower(words[0])
+
+	// Capitalize subsequent words
 	for i := 1; i < len(words); i++ {
 		words[i] = capitalize(words[i])
 	}
-	return strings.ToLower(words[0]) + strings.Join(words[1:], "")
+
+	return strings.Join(words, "")
 }
 
 // toPascalCase converts a name to PascalCase.
 func toPascalCase(name string) string {
-	// Split by underscores or spaces and capitalize the first letter of each word
-	words := strings.FieldsFunc(name, func(r rune) bool {
-		return r == '_' || r == ' '
-	})
-
+	words := splitIntoWords(name)
 	if len(words) == 0 {
 		return ""
 	}
 
-	// Capitalize every word
 	for i := range words {
 		words[i] = capitalize(words[i])
 	}
@@ -67,14 +57,15 @@ func toPascalCase(name string) string {
 
 // toSnakeCase converts a name to snake_case.
 func toSnakeCase(input string) string {
-	var result []rune
-	for i, r := range input {
-		if unicode.IsUpper(r) && i > 0 {
-			result = append(result, '_')
-		}
-		result = append(result, unicode.ToLower(r))
+	words := splitIntoWords(input)
+	if len(words) == 0 {
+		return ""
 	}
-	return string(result)
+
+	for i := range words {
+		words[i] = strings.ToLower(words[i])
+	}
+	return strings.Join(words, "_")
 }
 
 // toSnakeCaseUpper converts a name to SNAKE_CASE.
@@ -84,11 +75,7 @@ func toSnakeCaseUpper(input string) string {
 
 // toTitleCase converts a name to Title Case.
 func toTitleCase(name string) string {
-	// Split by underscores or spaces, and capitalize the first letter of each word
-	words := strings.FieldsFunc(name, func(r rune) bool {
-		return r == '_' || r == ' '
-	})
-
+	words := splitIntoWords(name)
 	if len(words) == 0 {
 		return ""
 	}
@@ -97,6 +84,48 @@ func toTitleCase(name string) string {
 		words[i] = capitalize(words[i])
 	}
 	return strings.Join(words, " ")
+}
+
+// splitIntoWords splits a string into words based on casing and delimiters.
+func splitIntoWords(s string) []string {
+	var words []string
+	var currentWord []rune
+
+	runes := []rune(s)
+	for i := 0; i < len(runes); i++ {
+		r := runes[i]
+
+		if r == '_' || r == ' ' {
+			if len(currentWord) > 0 {
+				words = append(words, string(currentWord))
+				currentWord = nil
+			}
+			continue
+		}
+
+		if i > 0 && unicode.IsUpper(r) {
+			prev := runes[i-1]
+			// Case 1: aB (lower -> upper)
+			if unicode.IsLower(prev) {
+				if len(currentWord) > 0 {
+					words = append(words, string(currentWord))
+					currentWord = nil
+				}
+			} else if unicode.IsUpper(prev) && i+1 < len(runes) && unicode.IsLower(runes[i+1]) {
+				// Case 2: ABc (upper -> upper -> lower) - split before the last upper
+				// e.g. JSONParser -> JSON, Parser. We are at 'P'. Prev is 'N'. Next is 'a'.
+				if len(currentWord) > 0 {
+					words = append(words, string(currentWord))
+					currentWord = nil
+				}
+			}
+		}
+		currentWord = append(currentWord, r)
+	}
+	if len(currentWord) > 0 {
+		words = append(words, string(currentWord))
+	}
+	return words
 }
 
 // capitalize capitalizes the first letter of a string and lowercases the rest.

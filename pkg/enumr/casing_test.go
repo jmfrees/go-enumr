@@ -14,6 +14,9 @@ func TestToCamelCase(t *testing.T) {
 		{"HELLO_WORLD", "helloWorld"},
 		{"hello world", "helloWorld"},
 		{"simple", "simple"},
+		{"JSONParser", "jsonParser"},
+		{"HTTPServer", "httpServer"},
+		{"IDCheck", "idCheck"},
 	}
 
 	for _, test := range tests {
@@ -74,6 +77,8 @@ func TestTransformName(t *testing.T) {
 		{"Pascal Case", "PascalCase", "my_enum_val", "MyEnumVal"},
 		{"Title Case", "Title Case", "my_enum_val", "My Enum Val"},
 		{"SNAKE CASE", "SNAKE_CASE", "MyEnumVal", "MY_ENUM_VAL"},
+		{"Snake Case Acronym", "snake_case", "JSONParser", "json_parser"},
+		{"Camel Case Acronym", "camelCase", "JSONParser", "jsonParser"},
 	}
 
 	for _, tt := range tests {
