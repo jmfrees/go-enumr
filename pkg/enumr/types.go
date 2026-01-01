@@ -4,26 +4,28 @@ import (
 	"go/ast"
 )
 
-// EnumData is used to pass the necessary data to the template.
-type EnumData struct {
+// enumData is used to pass the necessary data to the template.
+type enumData struct {
 	PackageName string
-	Enums       []EnumInfo
+	Enums       []enumInfo
 }
 
-// EnumInfo holds data for a specific enum type.
-type EnumInfo struct {
+// enumInfo holds data for a specific enum type.
+type enumInfo struct {
 	TypeName     string
-	Instances    []InstanceData
+	Instances    []instanceData
 	CaseFormat   string
 	GenerateVars bool
+	NameField    string
+	StructFields []fieldInfo
 }
 
-// TypeSpec holds information about a parsed type definition.
-type TypeSpec struct {
+// typeSpec holds information about a parsed type definition.
+type typeSpec struct {
 	PackageName string
 	TypeSpec    *ast.TypeSpec
 	Doc         *ast.CommentGroup
-	Fields      []FieldInfo
+	Fields      []fieldInfo
 }
 
 // typeDeclaration holds the AST nodes for a type declaration.
@@ -33,20 +35,20 @@ type typeDeclaration struct {
 	spec    *ast.TypeSpec
 }
 
-// FieldInfo holds information about a struct field.
-type FieldInfo struct {
+// fieldInfo holds information about a struct field.
+type fieldInfo struct {
 	Name string
 	Type string
 }
 
-// InstanceResolution holds the result of resolving enum instances.
-type InstanceResolution struct {
-	Instances    []InstanceData
+// instanceResolution holds the result of resolving enum instances.
+type instanceResolution struct {
+	Instances    []instanceData
 	GenerateVars bool
 }
 
-// InstanceData holds information about each constant instance.
-type InstanceData struct {
-	Name string
-	Init string
+// instanceData holds information about each constant instance.
+type instanceData struct {
+	Name   string
+	Fields map[string]string
 }

@@ -4,7 +4,6 @@ package testpkg
 
 import (
 	"fmt"
-	"strings"
 )
 
 // String converts the enum value to its corresponding name field.
@@ -25,14 +24,14 @@ func (t MyEnum) MarshalText() (text []byte, err error) {
 
 // UnmarshalText converts a string to the appropriate enum value.
 func (t *MyEnum) UnmarshalText(text []byte) error {
-	trimmedText := strings.ReplaceAll(string(text), "\"", "")
-	switch trimmedText {
+	value := string(text)
+	switch value {
 	case "value_one":
 		*t = ValueOne
 	case "value_two":
 		*t = ValueTwo
 	default:
-		return fmt.Errorf("unknown enum value: %q", trimmedText)
+		return fmt.Errorf("unknown enum value: %q", value)
 	}
 	return nil
 }

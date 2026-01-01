@@ -4,13 +4,14 @@ package {{.PackageName}}
 
 import (
 	"fmt"
-	"strings"
 )
 {{range .Enums}}
 {{- $typeName := .TypeName}}
+{{- $nameField := .NameField}}
+{{- $structFields := .StructFields}}
 {{- if .GenerateVars}}
 var ( {{- range .Instances -}}
-{{printf "\n\t"}}{{.Name}} = {{$typeName}}{ {{.Init}} }
+{{printf "\n\t"}}{{.Name}} = {{$typeName}}{ {{renderInit . $structFields}} }
 {{- end}}
 )
 {{end}}
@@ -19,7 +20,11 @@ var ( {{- range .Instances -}}
 func (t {{.TypeName}}) String() string {
 	switch t { {{- range .Instances -}}
 {{printf "\n\t"}}case {{.Name}}:
+{{- if $nameField }}
+		return {{ index .Fields $nameField }}
+{{- else }}
 		return "{{transformName .Name $format}}"
+{{- end }}
 {{- end}}
 	}
 	return ""
@@ -32,13 +37,13 @@ func (t {{.TypeName}}) MarshalText() (text []byte, err error) {
 
 // UnmarshalText converts a string to the appropriate enum value.
 func (t *{{.TypeName}}) UnmarshalText(text []byte) error {
-	trimmedText := strings.ReplaceAll(string(text), "\"", "")
-	switch trimmedText { {{- range .Instances -}}
-{{printf "\n\t"}}case "{{transformName .Name $format}}":
+	value := string(text)
+	switch value { {{- range .Instances -}}
+{{printf "\n\t"}}case {{ if $nameField }}{{ index .Fields $nameField }}{{ else }}"{{transformName .Name $format}}"{{ end }}:
 		*t = {{.Name}}
 {{- end}}
 	default:
-		return fmt.Errorf("unknown enum value: %q", trimmedText)
+		return fmt.Errorf("unknown enum value: %q", value)
 	}
 	return nil
 }
