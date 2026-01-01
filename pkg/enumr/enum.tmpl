@@ -32,7 +32,7 @@ func (t {{.TypeName}}) MarshalText() (text []byte, err error) {
 
 // UnmarshalText converts a string to the appropriate enum value.
 func (t *{{.TypeName}}) UnmarshalText(text []byte) error {
-	trimmedText := strings.ReplaceAll(strings.ToLower(string(text)), "\"", "")
+	trimmedText := strings.ReplaceAll(string(text), "\"", "")
 	switch trimmedText { {{- range .Instances -}}
 {{printf "\n\t"}}case "{{transformName .Name $format}}":
 		*t = {{.Name}}

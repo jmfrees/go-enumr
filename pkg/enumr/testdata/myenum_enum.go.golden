@@ -25,7 +25,7 @@ func (t MyEnum) MarshalText() (text []byte, err error) {
 
 // UnmarshalText converts a string to the appropriate enum value.
 func (t *MyEnum) UnmarshalText(text []byte) error {
-	trimmedText := strings.ReplaceAll(strings.ToLower(string(text)), "\"", "")
+	trimmedText := strings.ReplaceAll(string(text), "\"", "")
 	switch trimmedText {
 	case "value_one":
 		*t = ValueOne

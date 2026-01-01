@@ -126,7 +126,7 @@ The tool generates the following for your type:
 
 - `func (t Type) String() string`: Returns the enum name (e.g., "credit_card").
 - `func (t Type) MarshalText() ([]byte, error)`: Implements `encoding.TextMarshaler`.
-- `func (t *Type) UnmarshalText([]byte) error`: Implements `encoding.TextUnmarshaler`.
+- `func (t *Type) UnmarshalText([]byte) error`: Implements `encoding.TextUnmarshaler`. Matches the string representation exactly (case-sensitive).
 - `func TypeValues() []Type`: Returns a slice of all enum instances.
 - `func ParseType(s string) (Type, error)`: Helper to parse a string into an enum instance.
 
