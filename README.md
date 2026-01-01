@@ -134,7 +134,8 @@ The tool generates the following for your type:
 
 - `-type`: (Required) Comma-separated list of type names to generate code for.
 - `-format`: (Optional) Casing format for the string representation.
-  - `snake_case` (default)
+  - (empty) (default): Preserves the original casing.
+  - `snake_case`
   - `camelCase`
   - `PascalCase`
   - `SNAKE_CASE`

@@ -26,6 +26,11 @@ func transformName(format string) func(string) string {
 
 // toCamelCase converts a name to camelCase.
 func toCamelCase(name string) string {
+	// If the name is PascalCase (no underscores or spaces), convert to snake_case first
+	if !strings.ContainsAny(name, "_ ") {
+		name = toSnakeCase(name)
+	}
+
 	// Split by underscores or spaces and lower case the first letter of each word after the first
 	words := strings.FieldsFunc(name, func(r rune) bool {
 		return r == '_' || r == ' '
