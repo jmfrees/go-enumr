@@ -16,6 +16,8 @@ type EnumInfo struct {
 	Instances    []InstanceData
 	CaseFormat   string
 	GenerateVars bool
+	NameField    string
+	StructFields []FieldInfo
 }
 
 // TypeSpec holds information about a parsed type definition.
@@ -47,6 +49,6 @@ type InstanceResolution struct {
 
 // InstanceData holds information about each constant instance.
 type InstanceData struct {
-	Name string
-	Init string
+	Name   string
+	Fields map[string]string
 }

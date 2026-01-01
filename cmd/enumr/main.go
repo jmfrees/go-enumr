@@ -16,8 +16,17 @@ import (
 
 func main() {
 	typeNames := flag.String("type", "", "comma-separated list type(s) to generate for (required)")
-	format := flag.String("format", "", "format of the name for each enum instance (default: preserve case)")
-	output := flag.String("output", "", "output file name or directory (default: dir/<type>_enum.go)")
+	format := flag.String(
+		"format",
+		"",
+		"format of the name for each enum instance (default: preserve case)",
+	)
+	output := flag.String(
+		"output",
+		"",
+		"output file name or directory (default: dir/<type>_enum.go)",
+	)
+	nameField := flag.String("name-field", "", "field to use for string representation")
 
 	flag.Parse()
 
@@ -26,7 +35,7 @@ func main() {
 
 	// Ensure the -type argument is provided
 	if len(*typeNames) == 0 {
-		logger.Error("argument is required", "arg", "-type")
+		logger.ErrorContext(ctx, "argument is required", "arg", "-type")
 		os.Exit(2)
 	}
 	targetTypes := strings.Split(*typeNames, ",")
@@ -39,7 +48,7 @@ func main() {
 
 	var dir string
 
-	if len(args) == 1 && isDirectory(args[0], logger) {
+	if len(args) == 1 && isDirectory(ctx, args[0], logger) {
 		dir = args[0]
 	} else {
 		dir = filepath.Dir(args[0])
@@ -69,9 +78,9 @@ func main() {
 
 	// Process the loaded package and files
 	generator := enumr.NewGenerator(logger)
-	err = generator.Generate(ctx, pkg, targetTypes, nameFormat, outputName)
+	err = generator.Generate(ctx, pkg, targetTypes, nameFormat, outputName, *nameField)
 	if err != nil {
-		logger.Error("Error processing file", "error", err)
+		logger.ErrorContext(ctx, "Error processing file", "error", err)
 		os.Exit(1)
 	}
 
@@ -102,10 +111,10 @@ func loadPackageFromDir(dir string) (*packages.Package, error) {
 }
 
 // isDirectory reports whether the named file is a directory.
-func isDirectory(name string, logger *slog.Logger) bool {
+func isDirectory(ctx context.Context, name string, logger *slog.Logger) bool {
 	info, err := os.Stat(name)
 	if err != nil {
-		logger.Error("Error checking directory", "error", err)
+		logger.ErrorContext(ctx, "Error checking directory", "error", err)
 		os.Exit(1)
 	}
 	return info.IsDir()

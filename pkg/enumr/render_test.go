@@ -48,14 +48,31 @@ func TestGenerateEnumSource(t *testing.T) {
 
 func TestGenerateEnumSourceWithVars(t *testing.T) {
 	packageName := "testpkg"
+	fields := []FieldInfo{
+		{Name: "Code", Type: "string"},
+		{Name: "Desc", Type: "string"},
+	}
 	enums := []EnumInfo{
 		{
 			TypeName:     "PaymentMethod",
 			CaseFormat:   "snake_case",
 			GenerateVars: true,
+			StructFields: fields,
 			Instances: []InstanceData{
-				{Name: "CreditCard", Init: "Code: \"CC\", Desc: \"Credit Card\""},
-				{Name: "PayPal", Init: "Code: \"PP\", Desc: \"PayPal\""},
+				{
+					Name: "CreditCard",
+					Fields: map[string]string{
+						"Code": "\"CC\"",
+						"Desc": "\"Credit Card\"",
+					},
+				},
+				{
+					Name: "PayPal",
+					Fields: map[string]string{
+						"Code": "\"PP\"",
+						"Desc": "\"PayPal\"",
+					},
+				},
 			},
 		},
 	}

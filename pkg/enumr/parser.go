@@ -1,8 +1,10 @@
 package enumr
 
 import (
+	"bytes"
 	"fmt"
 	"go/ast"
+	"go/printer"
 	"go/token"
 
 	"golang.org/x/tools/go/packages"
@@ -88,7 +90,7 @@ func resolveFieldType(pkg *packages.Package, field *ast.Field) string {
 }
 
 // collectInstances processes the var declarations and collects instance names.
-func collectInstances(pkg *packages.Package, typeName string) []InstanceData {
+func collectInstances(pkg *packages.Package, typeName string, fields []FieldInfo) []InstanceData {
 	var instances []InstanceData
 	for _, file := range pkg.Syntax {
 		for _, decl := range file.Decls {
@@ -106,7 +108,7 @@ func collectInstances(pkg *packages.Package, typeName string) []InstanceData {
 				}
 
 				// Collect instances related to the type
-				collectVarsOfType(valueSpec, typeName, &instances)
+				collectVarsOfType(pkg, valueSpec, typeName, fields, &instances)
 			}
 		}
 	}
@@ -114,7 +116,13 @@ func collectInstances(pkg *packages.Package, typeName string) []InstanceData {
 }
 
 // collectVarsOfType checks if the variable's type matches the target struct type and adds to instances.
-func collectVarsOfType(valueSpec *ast.ValueSpec, typeName string, instances *[]InstanceData) {
+func collectVarsOfType(
+	pkg *packages.Package,
+	valueSpec *ast.ValueSpec,
+	typeName string,
+	fields []FieldInfo,
+	instances *[]InstanceData,
+) {
 	for i, value := range valueSpec.Values {
 		v, ok := value.(*ast.CompositeLit)
 		if !ok || v.Type == nil {
@@ -130,8 +138,50 @@ func collectVarsOfType(valueSpec *ast.ValueSpec, typeName string, instances *[]I
 			}
 			// Add the instance name to the list
 			*instances = append(*instances, InstanceData{
-				Name: valueSpec.Names[i].Name,
+				Name:   valueSpec.Names[i].Name,
+				Fields: extractFieldValues(pkg, v, fields),
 			})
 		}
 	}
+}
+
+func extractFieldValues(
+	pkg *packages.Package,
+	lit *ast.CompositeLit,
+	fields []FieldInfo,
+) map[string]string {
+	values := make(map[string]string)
+
+	// Handle named fields
+	isNamed := false
+	for _, elt := range lit.Elts {
+		if kv, ok := elt.(*ast.KeyValueExpr); ok {
+			isNamed = true
+			key, ok := kv.Key.(*ast.Ident)
+			if !ok {
+				continue
+			}
+
+			// Get value as string
+			val := exprToString(pkg, kv.Value)
+			values[key.Name] = val
+		}
+	}
+
+	// Handle positional fields if no named fields were found
+	if !isNamed {
+		for i, elt := range lit.Elts {
+			if i < len(fields) {
+				values[fields[i].Name] = exprToString(pkg, elt)
+			}
+		}
+	}
+
+	return values
+}
+
+func exprToString(pkg *packages.Package, expr ast.Expr) string {
+	var buf bytes.Buffer
+	printer.Fprint(&buf, pkg.Fset, expr)
+	return buf.String()
 }

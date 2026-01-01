@@ -28,6 +28,7 @@ func (g *Generator) Generate(
 	typeNames []string,
 	nameFormat string,
 	output string,
+	nameField string,
 ) error {
 	var enums []EnumInfo
 
@@ -44,11 +45,26 @@ func (g *Generator) Generate(
 			return err
 		}
 
+		// Validate that if nameField is specified, all instances have it
+		if nameField != "" {
+			for _, instance := range resolution.Instances {
+				if _, ok := instance.Fields[nameField]; !ok {
+					return fmt.Errorf(
+						"instance %s does not have field %q",
+						instance.Name,
+						nameField,
+					)
+				}
+			}
+		}
+
 		enums = append(enums, EnumInfo{
 			TypeName:     typeName,
 			Instances:    resolution.Instances,
 			CaseFormat:   nameFormat,
 			GenerateVars: resolution.GenerateVars,
+			NameField:    nameField,
+			StructFields: typeSpec.Fields,
 		})
 	}
 
@@ -104,7 +120,11 @@ func getOutputFilename(dir, firstType, output string) string {
 }
 
 // resolveInstances determines the instances for a type, prioritizing directives over manual scanning.
-func (g *Generator) resolveInstances(ctx context.Context, pkg *packages.Package, typeSpec *TypeSpec) (InstanceResolution, error) {
+func (g *Generator) resolveInstances(
+	ctx context.Context,
+	pkg *packages.Package,
+	typeSpec *TypeSpec,
+) (InstanceResolution, error) {
 	// 1. Try Directives
 	instances := parseDirectives(ctx, g.Logger, typeSpec.Doc, typeSpec.Fields)
 	if len(instances) > 0 {
@@ -112,10 +132,13 @@ func (g *Generator) resolveInstances(ctx context.Context, pkg *packages.Package,
 	}
 
 	// 2. Fallback to Scanning
-	instances = collectInstances(pkg, typeSpec.TypeSpec.Name.Name)
+	instances = collectInstances(pkg, typeSpec.TypeSpec.Name.Name, typeSpec.Fields)
 	if len(instances) > 0 {
 		return InstanceResolution{Instances: instances, GenerateVars: false}, nil
 	}
 
-	return InstanceResolution{}, fmt.Errorf("failed to find any instances of %s", typeSpec.TypeSpec.Name.Name)
+	return InstanceResolution{}, fmt.Errorf(
+		"failed to find any instances of %s",
+		typeSpec.TypeSpec.Name.Name,
+	)
 }

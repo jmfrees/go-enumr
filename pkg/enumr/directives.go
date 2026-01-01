@@ -11,7 +11,12 @@ import (
 )
 
 // parseDirectives parses the comment group for enumr directives.
-func parseDirectives(ctx context.Context, logger *slog.Logger, doc *ast.CommentGroup, fields []FieldInfo) []InstanceData {
+func parseDirectives(
+	ctx context.Context,
+	logger *slog.Logger,
+	doc *ast.CommentGroup,
+	fields []FieldInfo,
+) []InstanceData {
 	if doc == nil {
 		return nil
 	}
@@ -26,7 +31,12 @@ func parseDirectives(ctx context.Context, logger *slog.Logger, doc *ast.CommentG
 	return instances
 }
 
-func parseDirective(ctx context.Context, logger *slog.Logger, text string, fields []FieldInfo) (InstanceData, bool) {
+func parseDirective(
+	ctx context.Context,
+	logger *slog.Logger,
+	text string,
+	fields []FieldInfo,
+) (InstanceData, bool) {
 	if !strings.HasPrefix(text, "//") {
 		return InstanceData{}, false
 	}
@@ -58,9 +68,21 @@ func parseDirective(ctx context.Context, logger *slog.Logger, text string, field
 	// Remove the 'enumr' key so it doesn't get processed as a field
 	delete(values, "enumr")
 
+	fieldMap := make(map[string]string)
+	for _, field := range fields {
+		val, ok := values[field.Name]
+		if !ok {
+			continue
+		}
+		if field.Type == "string" {
+			val = fmt.Sprintf("%q", val)
+		}
+		fieldMap[field.Name] = val
+	}
+
 	return InstanceData{
-		Name: name,
-		Init: buildInitString(fields, values),
+		Name:   name,
+		Fields: fieldMap,
 	}, true
 }
 
@@ -86,23 +108,6 @@ func parseArgs(ctx context.Context, logger *slog.Logger, args []string) map[stri
 		}
 	}
 	return values
-}
-
-// buildInitString constructs the initialization string for the struct instance.
-func buildInitString(fields []FieldInfo, values map[string]string) string {
-	var parts []string
-	for _, field := range fields {
-		val, ok := values[field.Name]
-		if !ok {
-			continue
-		}
-
-		if field.Type == "string" {
-			val = fmt.Sprintf("%q", val)
-		}
-		parts = append(parts, fmt.Sprintf("%s: %s", field.Name, val))
-	}
-	return strings.Join(parts, ", ")
 }
 
 // splitArgs splits a string into arguments, respecting quotes.

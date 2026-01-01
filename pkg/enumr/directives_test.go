@@ -100,6 +100,13 @@ func TestParseDirectives(t *testing.T) {
 			wantName:  "Item7",
 			wantInit:  "Const: SomeConstant",
 		},
+		{
+			name:      "Quoted string with spaces",
+			directive: "//enumr:Item8 Desc:\"two words\"",
+			wantCount: 1,
+			wantName:  "Item8",
+			wantInit:  "Desc: \"two words\"",
+		},
 	}
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
@@ -121,8 +128,9 @@ func TestParseDirectives(t *testing.T) {
 				if inst.Name != tt.wantName {
 					t.Errorf("Name = %q; want %q", inst.Name, tt.wantName)
 				}
-				if inst.Init != tt.wantInit {
-					t.Errorf("Init = %q; want %q", inst.Init, tt.wantInit)
+				gotInit := renderInit(inst, fields)
+				if gotInit != tt.wantInit {
+					t.Errorf("Init = %q; want %q", gotInit, tt.wantInit)
 				}
 			}
 		})
