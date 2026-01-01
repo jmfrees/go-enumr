@@ -34,6 +34,12 @@ func parseDirective(ctx context.Context, logger *slog.Logger, text string, field
 	// Normalize: "// enumr:Name" -> "enumr:Name"
 	content := strings.TrimSpace(strings.TrimPrefix(text, "//"))
 
+	// Optimization: If it doesn't start with "enumr:", it's likely not for us.
+	// This avoids parsing unrelated comments like "//go:generate ..." and logging warnings.
+	if !strings.HasPrefix(content, "enumr:") {
+		return InstanceData{}, false
+	}
+
 	// Split the entire line into arguments
 	parts := splitArgs(content)
 	if len(parts) == 0 {

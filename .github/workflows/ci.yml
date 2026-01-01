@@ -33,7 +33,7 @@ jobs:
         fi
 
     - name: Build Generator
-      run: go build -o enumr .
+      run: go build -o enumr ./cmd/enumr
 
     - name: Run Go Generate
       run: go generate ./...
