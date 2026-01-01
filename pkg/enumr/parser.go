@@ -11,7 +11,7 @@ import (
 )
 
 // processTypeSpec processes the type declarations and ensures the type name matches.
-func processTypeSpec(pkg *packages.Package, typeName string) (*TypeSpec, error) {
+func processTypeSpec(pkg *packages.Package, typeName string) (*typeSpec, error) {
 	decl, err := findTypeDeclaration(pkg, typeName)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func processTypeSpec(pkg *packages.Package, typeName string) (*TypeSpec, error) 
 		doc = decl.spec.Doc
 	}
 
-	return &TypeSpec{
+	return &typeSpec{
 		PackageName: decl.file.Name.Name,
 		TypeSpec:    decl.spec,
 		Doc:         doc,
@@ -60,8 +60,8 @@ func findTypeDeclaration(pkg *packages.Package, typeName string) (*typeDeclarati
 }
 
 // extractFields extracts field information from a struct type specification.
-func extractFields(pkg *packages.Package, typeSpec *ast.TypeSpec) []FieldInfo {
-	var fields []FieldInfo
+func extractFields(pkg *packages.Package, typeSpec *ast.TypeSpec) []fieldInfo {
+	var fields []fieldInfo
 	structType, ok := typeSpec.Type.(*ast.StructType)
 	if !ok {
 		return nil
@@ -70,7 +70,7 @@ func extractFields(pkg *packages.Package, typeSpec *ast.TypeSpec) []FieldInfo {
 	for _, field := range structType.Fields.List {
 		typeStr := resolveFieldType(pkg, field)
 		for _, name := range field.Names {
-			fields = append(fields, FieldInfo{Name: name.Name, Type: typeStr})
+			fields = append(fields, fieldInfo{Name: name.Name, Type: typeStr})
 		}
 	}
 	return fields
@@ -90,8 +90,8 @@ func resolveFieldType(pkg *packages.Package, field *ast.Field) string {
 }
 
 // collectInstances processes the var declarations and collects instance names.
-func collectInstances(pkg *packages.Package, typeName string, fields []FieldInfo) []InstanceData {
-	var instances []InstanceData
+func collectInstances(pkg *packages.Package, typeName string, fields []fieldInfo) []instanceData {
+	var instances []instanceData
 	for _, file := range pkg.Syntax {
 		for _, decl := range file.Decls {
 			// Only process var declarations
@@ -120,8 +120,8 @@ func collectVarsOfType(
 	pkg *packages.Package,
 	valueSpec *ast.ValueSpec,
 	typeName string,
-	fields []FieldInfo,
-	instances *[]InstanceData,
+	fields []fieldInfo,
+	instances *[]instanceData,
 ) {
 	for i, value := range valueSpec.Values {
 		v, ok := value.(*ast.CompositeLit)
@@ -137,7 +137,7 @@ func collectVarsOfType(
 				continue
 			}
 			// Add the instance name to the list
-			*instances = append(*instances, InstanceData{
+			*instances = append(*instances, instanceData{
 				Name:   valueSpec.Names[i].Name,
 				Fields: extractFieldValues(pkg, v, fields),
 			})
@@ -148,7 +148,7 @@ func collectVarsOfType(
 func extractFieldValues(
 	pkg *packages.Package,
 	lit *ast.CompositeLit,
-	fields []FieldInfo,
+	fields []fieldInfo,
 ) map[string]string {
 	values := make(map[string]string)
 

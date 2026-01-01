@@ -13,11 +13,11 @@ var update = flag.Bool("update", false, "update golden files")
 
 func TestGenerateEnumSource(t *testing.T) {
 	packageName := "testpkg"
-	enums := []EnumInfo{
+	enums := []enumInfo{
 		{
 			TypeName:   "MyEnum",
 			CaseFormat: "snake_case",
-			Instances: []InstanceData{
+			Instances: []instanceData{
 				{Name: "ValueOne"},
 				{Name: "ValueTwo"},
 			},
@@ -48,17 +48,17 @@ func TestGenerateEnumSource(t *testing.T) {
 
 func TestGenerateEnumSourceWithVars(t *testing.T) {
 	packageName := "testpkg"
-	fields := []FieldInfo{
+	fields := []fieldInfo{
 		{Name: "Code", Type: "string"},
 		{Name: "Desc", Type: "string"},
 	}
-	enums := []EnumInfo{
+	enums := []enumInfo{
 		{
 			TypeName:     "PaymentMethod",
 			CaseFormat:   "snake_case",
 			GenerateVars: true,
 			StructFields: fields,
-			Instances: []InstanceData{
+			Instances: []instanceData{
 				{
 					Name: "CreditCard",
 					Fields: map[string]string{

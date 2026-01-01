@@ -17,7 +17,10 @@ func TestSplitArgs(t *testing.T) {
 		{"key:value flag:true", []string{"key:value", "flag:true"}},
 		{"key:\"quoted value\"", []string{"key:\"quoted value\""}},
 		{"key:\"quoted value\" flag:true", []string{"key:\"quoted value\"", "flag:true"}},
-		{"key:\"value with spaces\" another:val", []string{"key:\"value with spaces\"", "another:val"}},
+		{
+			"key:\"value with spaces\" another:val",
+			[]string{"key:\"value with spaces\"", "another:val"},
+		},
 	}
 
 	for _, test := range tests {
@@ -29,7 +32,7 @@ func TestSplitArgs(t *testing.T) {
 }
 
 func TestParseDirectives(t *testing.T) {
-	fields := []FieldInfo{
+	fields := []fieldInfo{
 		{Name: "Code", Type: "string"},
 		{Name: "Desc", Type: "string"},
 		{Name: "IsActive", Type: "bool"},
@@ -68,10 +71,10 @@ func TestParseDirectives(t *testing.T) {
 			},
 		},
 		{
-			name:      "No fields",
-			directive: "// enumr:Item3",
-			wantCount: 1,
-			wantName:  "Item3",
+			name:       "No fields",
+			directive:  "// enumr:Item3",
+			wantCount:  1,
+			wantName:   "Item3",
 			wantFields: map[string]string{},
 		},
 		{

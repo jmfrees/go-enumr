@@ -14,7 +14,7 @@ var enumTemplate string
 // generateEnumSource generates the actual code for the type, using a template.
 func generateEnumSource(
 	packageName string,
-	enums []EnumInfo,
+	enums []enumInfo,
 ) ([]byte, error) {
 	// Create the template object with a function map for name transformations
 	tmplFuncs := template.FuncMap{
@@ -30,7 +30,7 @@ func generateEnumSource(
 	}
 
 	// Define the data to pass to the template
-	data := EnumData{
+	data := enumData{
 		PackageName: packageName,
 		Enums:       enums,
 	}
@@ -45,7 +45,7 @@ func generateEnumSource(
 	return buf.Bytes(), nil
 }
 
-func renderInit(instance InstanceData, fields []FieldInfo) string {
+func renderInit(instance instanceData, fields []fieldInfo) string {
 	var parts []string
 	for _, field := range fields {
 		val, ok := instance.Fields[field.Name]

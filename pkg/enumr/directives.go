@@ -15,13 +15,13 @@ func parseDirectives(
 	ctx context.Context,
 	logger *slog.Logger,
 	doc *ast.CommentGroup,
-	fields []FieldInfo,
-) []InstanceData {
+	fields []fieldInfo,
+) []instanceData {
 	if doc == nil {
 		return nil
 	}
 
-	var instances []InstanceData
+	var instances []instanceData
 	for _, comment := range doc.List {
 		if instance, ok := parseDirective(ctx, logger, comment.Text, fields); ok {
 			instances = append(instances, instance)
@@ -35,10 +35,10 @@ func parseDirective(
 	ctx context.Context,
 	logger *slog.Logger,
 	text string,
-	fields []FieldInfo,
-) (InstanceData, bool) {
+	fields []fieldInfo,
+) (instanceData, bool) {
 	if !strings.HasPrefix(text, "//") {
-		return InstanceData{}, false
+		return instanceData{}, false
 	}
 
 	// Normalize: "// enumr:Name" -> "enumr:Name"
@@ -47,13 +47,13 @@ func parseDirective(
 	// Optimization: If it doesn't start with "enumr:", it's likely not for us.
 	// This avoids parsing unrelated comments like "//go:generate ..." and logging warnings.
 	if !strings.HasPrefix(content, "enumr:") {
-		return InstanceData{}, false
+		return instanceData{}, false
 	}
 
 	// Split the entire line into arguments
 	parts := splitArgs(content)
 	if len(parts) == 0 {
-		return InstanceData{}, false
+		return instanceData{}, false
 	}
 
 	// Parse all arguments into a map
@@ -62,7 +62,7 @@ func parseDirective(
 	// Check for the 'enumr' key which defines the instance name
 	name, ok := values["enumr"]
 	if !ok {
-		return InstanceData{}, false
+		return instanceData{}, false
 	}
 
 	// Remove the 'enumr' key so it doesn't get processed as a field
@@ -80,7 +80,7 @@ func parseDirective(
 		fieldMap[field.Name] = val
 	}
 
-	return InstanceData{
+	return instanceData{
 		Name:   name,
 		Fields: fieldMap,
 	}, true

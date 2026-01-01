@@ -30,7 +30,7 @@ func (g *Generator) Generate(
 	output string,
 	nameField string,
 ) error {
-	var enums []EnumInfo
+	var enums []enumInfo
 
 	for _, typeName := range typeNames {
 		// Process type declaration
@@ -58,7 +58,7 @@ func (g *Generator) Generate(
 			}
 		}
 
-		enums = append(enums, EnumInfo{
+		enums = append(enums, enumInfo{
 			TypeName:     typeName,
 			Instances:    resolution.Instances,
 			CaseFormat:   nameFormat,
@@ -123,21 +123,21 @@ func getOutputFilename(dir, firstType, output string) string {
 func (g *Generator) resolveInstances(
 	ctx context.Context,
 	pkg *packages.Package,
-	typeSpec *TypeSpec,
-) (InstanceResolution, error) {
+	typeSpec *typeSpec,
+) (instanceResolution, error) {
 	// 1. Try Directives
 	instances := parseDirectives(ctx, g.Logger, typeSpec.Doc, typeSpec.Fields)
 	if len(instances) > 0 {
-		return InstanceResolution{Instances: instances, GenerateVars: true}, nil
+		return instanceResolution{Instances: instances, GenerateVars: true}, nil
 	}
 
 	// 2. Fallback to Scanning
 	instances = collectInstances(pkg, typeSpec.TypeSpec.Name.Name, typeSpec.Fields)
 	if len(instances) > 0 {
-		return InstanceResolution{Instances: instances, GenerateVars: false}, nil
+		return instanceResolution{Instances: instances, GenerateVars: false}, nil
 	}
 
-	return InstanceResolution{}, fmt.Errorf(
+	return instanceResolution{}, fmt.Errorf(
 		"failed to find any instances of %s",
 		typeSpec.TypeSpec.Name.Name,
 	)
