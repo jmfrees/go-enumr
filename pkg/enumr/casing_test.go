@@ -60,3 +60,29 @@ func TestToTitleCase(t *testing.T) {
 		}
 	}
 }
+
+func TestTransformName(t *testing.T) {
+	tests := []struct {
+		name     string
+		format   string
+		input    string
+		expected string
+	}{
+		{"Default (empty)", "", "MyEnumVal", "MyEnumVal"},
+		{"Snake Case", "snake_case", "MyEnumVal", "my_enum_val"},
+		{"Camel Case", "camelCase", "MyEnumVal", "myEnumVal"},
+		{"Pascal Case", "PascalCase", "my_enum_val", "MyEnumVal"},
+		{"Title Case", "Title Case", "my_enum_val", "My Enum Val"},
+		{"SNAKE CASE", "SNAKE_CASE", "MyEnumVal", "MY_ENUM_VAL"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			transform := transformName(tt.format)
+			got := transform(tt.input)
+			if got != tt.expected {
+				t.Errorf("transformName(%q)(%q) = %q; want %q", tt.format, tt.input, got, tt.expected)
+			}
+		})
+	}
+}
