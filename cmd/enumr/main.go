@@ -78,9 +78,23 @@ func main() {
 
 	// Process the loaded package and files
 	generator := enumr.NewGenerator(logger)
-	err = generator.Generate(ctx, pkg, targetTypes, nameFormat, outputName, *marshalField)
+	source, err := generator.Generate(ctx, pkg, targetTypes, nameFormat, *marshalField)
 	if err != nil {
 		logger.ErrorContext(ctx, "Error processing file", "error", err)
+		os.Exit(1)
+	}
+
+	if source == nil {
+		logger.LogAttrs(ctx, slog.LevelInfo, "No enums found to generate")
+		return
+	}
+
+	// Determine output filename
+	outFileName := enumr.GetOutputFilename(pkg.Dir, targetTypes[0], outputName)
+
+	// Write the generated source to a file
+	if err = os.WriteFile(outFileName, source, 0o644); err != nil {
+		logger.ErrorContext(ctx, "Error writing file", "file", outFileName, "error", err)
 		os.Exit(1)
 	}
 
@@ -88,6 +102,7 @@ func main() {
 		ctx,
 		slog.LevelDebug,
 		"Enum generation completed successfully",
+		slog.String("file", outFileName),
 	)
 }
 

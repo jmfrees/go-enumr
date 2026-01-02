@@ -47,9 +47,9 @@ func TestGetOutputFilename(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := getOutputFilename(tt.dir, tt.firstType, tt.output)
+			got := GetOutputFilename(tt.dir, tt.firstType, tt.output)
 			if got != tt.expected {
-				t.Errorf("getOutputFilename(%q, %q, %q) = %q; want %q", tt.dir, tt.firstType, tt.output, got, tt.expected)
+				t.Errorf("GetOutputFilename(%q, %q, %q) = %q; want %q", tt.dir, tt.firstType, tt.output, got, tt.expected)
 			}
 		})
 	}
