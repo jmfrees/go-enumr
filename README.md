@@ -196,6 +196,25 @@ The tool generates the following for your type:
 
 Since Go structs cannot be `const`, these enums are defined as `var`. While technically mutable, the convention is to treat them as immutable constants.
 
+### Immutability with Private Fields
+
+To more strictly enforce immutability, the recommended pattern is to use **private fields** in your struct definition and expose data via **public getter methods**.
+
+```go
+//enumr:Free Price:0.0
+//enumr:Pro  Price:29.99
+type Plan struct {
+    price float64 // private field
+}
+
+// Public getter prevents external modification
+func (p Plan) Price() float64 {
+    return p.price
+}
+```
+
+This ensures that consumers of your package can read the data but cannot modify the enum fields directly.
+
 ## Inspiration
 
 This project is inspired by the excellent work of:
