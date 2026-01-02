@@ -88,20 +88,22 @@ var (
 ```
 
 **Syntax Rules:**
-*   `Key:Value` sets a field (e.g., `Code:CC`).
-*   `Key:"Value with spaces"` sets a string field with spaces.
-*   `Key:true` sets a boolean field (e.g., `IsCredit:true`).
-*   `Key:"[]string{\"a\", \"b\"}"` sets complex types (slices, structs) by quoting the Go syntax.
-*   Fields not specified default to their zero value.
+
+- `Key:Value` sets a field (e.g., `Code:CC`).
+- `Key:"Value with spaces"` sets a string field with spaces.
+- `Key:true` sets a boolean field (e.g., `IsCredit:true`).
+- `Key:"[]string{\"a\", \"b\"}"` sets complex types (slices, structs) by quoting the Go syntax.
+- Fields not specified default to their zero value.
 
 ### 2. Manual Mode
 
 If you need complex initialization (e.g., function calls, external imports) or want to document individual instances, you can define the variables yourself.
 
 **When to use Manual Mode:**
-*   You need to use functions like `time.Now()`.
-*   You need to import other packages.
-*   You want to add godoc comments to specific enum instances.
+
+- You need to use functions like `time.Now()`.
+- You need to import other packages.
+- You want to add godoc comments to specific enum instances.
 
 ```go
 package payment
@@ -143,6 +145,7 @@ The tool generates the following for your type:
   - `Title Case`
 - `-output`: (Optional) Output file name or directory. Defaults to `<type>_enum.go` in the package directory.
 - `-zero`: (Optional) Allow the zero value (empty string) to be parsed as a valid enum value. Useful for optional fields that default to the zero value.
+- `-dry-run`: (Optional) Perform a trial run without writing any files. The generated source code will be printed to stdout.
 
 ## Best Practices
 
