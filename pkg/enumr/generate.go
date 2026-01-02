@@ -22,34 +22,34 @@ func NewGenerator(logger *slog.Logger) *Generator {
 }
 
 // Generate processes a single Go file to find and generate enums for the given type.
+// It returns the generated source code as a byte slice.
 func (g *Generator) Generate(
 	ctx context.Context,
 	pkg *packages.Package,
 	typeNames []string,
 	nameFormat string,
-	output string,
 	marshalField string,
-) error {
+) ([]byte, error) {
 	var enums []enumInfo
 
 	for _, typeName := range typeNames {
 		// Process type declaration
 		typeSpec, err := processTypeSpec(pkg, typeName)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// Resolve instances (either from directives or by scanning vars)
 		resolution, err := g.resolveInstances(ctx, pkg, typeSpec)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		// Validate that if marshalField is specified, all instances have it
 		if marshalField != "" {
 			for _, instance := range resolution.Instances {
 				if _, ok := instance.Fields[marshalField]; !ok {
-					return fmt.Errorf(
+					return nil, fmt.Errorf(
 						"instance %s does not have field %q",
 						instance.Name,
 						marshalField,
@@ -69,7 +69,7 @@ func (g *Generator) Generate(
 	}
 
 	if len(enums) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	g.Logger.LogAttrs(
@@ -83,29 +83,14 @@ func (g *Generator) Generate(
 	// Generate the enum code for the type and its instances
 	source, err := generateEnumSource(pkg.Name, enums)
 	if err != nil {
-		return fmt.Errorf("error generating enum source: %w", err)
+		return nil, fmt.Errorf("error generating enum source: %w", err)
 	}
 
-	// Determine output filename
-	outFileName := getOutputFilename(pkg.Dir, typeNames[0], output)
-
-	// Write the generated source to a file
-	if err = os.WriteFile(outFileName, source, 0o644); err != nil {
-		return fmt.Errorf("failed to write file %s: %w", outFileName, err)
-	}
-
-	g.Logger.LogAttrs(
-		ctx,
-		slog.LevelDebug,
-		"Enum code generated successfully",
-		slog.String("file", outFileName),
-	)
-
-	return nil
+	return source, nil
 }
 
-// getOutputFilename determines the output filename based on the directory, type name, and output flag.
-func getOutputFilename(dir, firstType, output string) string {
+// GetOutputFilename determines the output filename based on the directory, type name, and output flag.
+func GetOutputFilename(dir, firstType, output string) string {
 	if output == "" {
 		// Default: <first_type>_enum.go in the package directory
 		return filepath.Join(dir, fmt.Sprintf("%s_enum.go", toSnakeCase(firstType)))
