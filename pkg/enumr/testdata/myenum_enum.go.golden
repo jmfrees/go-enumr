@@ -17,6 +17,18 @@ func (t MyEnum) String() string {
 	return ""
 }
 
+// ParseMyEnum converts a string to a MyEnum.
+func ParseMyEnum(text string) (MyEnum, error) {
+	switch text {
+	case "value_one":
+		return ValueOne, nil
+	case "value_two":
+		return ValueTwo, nil
+	default:
+		return MyEnum{}, fmt.Errorf("unknown enum value: %q", text)
+	}
+}
+
 // MarshalText converts the enum value to a string.
 func (t MyEnum) MarshalText() (text []byte, err error) {
 	return []byte(t.String()), nil
@@ -24,15 +36,11 @@ func (t MyEnum) MarshalText() (text []byte, err error) {
 
 // UnmarshalText converts a string to the appropriate enum value.
 func (t *MyEnum) UnmarshalText(text []byte) error {
-	value := string(text)
-	switch value {
-	case "value_one":
-		*t = ValueOne
-	case "value_two":
-		*t = ValueTwo
-	default:
-		return fmt.Errorf("unknown enum value: %q", value)
+	val, err := ParseMyEnum(string(text))
+	if err != nil {
+		return err
 	}
+	*t = val
 	return nil
 }
 
@@ -44,9 +52,3 @@ func MyEnumValues() []MyEnum {
 	}
 }
 
-// ParseMyEnum converts a string to a MyEnum.
-func ParseMyEnum(text string) (MyEnum, error) {
-	var t MyEnum
-	err := t.UnmarshalText([]byte(text))
-	return t, err
-}

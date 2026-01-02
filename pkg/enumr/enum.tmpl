@@ -30,6 +30,17 @@ func (t {{.TypeName}}) String() string {
 	return ""
 }
 
+// Parse{{.TypeName}} converts a string to a {{.TypeName}}.
+func Parse{{.TypeName}}(text string) ({{.TypeName}}, error) {
+	switch text { {{- range .Instances -}}
+{{printf "\n\t"}}case {{ if $marshalField }}{{ index .Fields $marshalField }}{{ else }}"{{transformName .Name $format}}"{{ end }}:
+		return {{.Name}}, nil
+{{- end}}
+	default:
+		return {{.TypeName}}{}, fmt.Errorf("unknown enum value: %q", text)
+	}
+}
+
 // MarshalText converts the enum value to a string.
 func (t {{.TypeName}}) MarshalText() (text []byte, err error) {
 	return []byte(t.String()), nil
@@ -37,14 +48,11 @@ func (t {{.TypeName}}) MarshalText() (text []byte, err error) {
 
 // UnmarshalText converts a string to the appropriate enum value.
 func (t *{{.TypeName}}) UnmarshalText(text []byte) error {
-	value := string(text)
-	switch value { {{- range .Instances -}}
-{{printf "\n\t"}}case {{ if $marshalField }}{{ index .Fields $marshalField }}{{ else }}"{{transformName .Name $format}}"{{ end }}:
-		*t = {{.Name}}
-{{- end}}
-	default:
-		return fmt.Errorf("unknown enum value: %q", value)
+	val, err := Parse{{.TypeName}}(string(text))
+	if err != nil {
+		return err
 	}
+	*t = val
 	return nil
 }
 
@@ -54,12 +62,5 @@ func {{.TypeName}}Values() []{{.TypeName}} {
 {{printf "\n\t\t"}}{{.Name}},
 {{- end}}
 	}
-}
-
-// Parse{{.TypeName}} converts a string to a {{.TypeName}}.
-func Parse{{.TypeName}}(text string) ({{.TypeName}}, error) {
-	var t {{.TypeName}}
-	err := t.UnmarshalText([]byte(text))
-	return t, err
 }
 {{end}}
