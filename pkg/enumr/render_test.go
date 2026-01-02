@@ -91,3 +91,29 @@ func TestGenerateEnumSourceWithVars(t *testing.T) {
 		t.Errorf("generated source does not contain expected var block.\nGot:\n%s", source)
 	}
 }
+
+func TestGenerateEnumSourceWithZero(t *testing.T) {
+	packageName := "testpkg"
+	enums := []enumInfo{
+		{
+			TypeName:    "MyEnum",
+			CaseFormat:  "snake_case",
+			IncludeZero: true,
+			Instances: []instanceData{
+				{Name: "ValueOne"},
+			},
+		},
+	}
+
+	source, err := generateEnumSource(packageName, enums)
+	if err != nil {
+		t.Fatalf("generateEnumSource failed: %v", err)
+	}
+
+	expectedSnippet := `case "":
+		return MyEnum{}, nil`
+
+	if !strings.Contains(string(source), expectedSnippet) {
+		t.Errorf("generated source does not contain zero value case.\nGot:\n%s", source)
+	}
+}

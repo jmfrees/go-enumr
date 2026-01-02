@@ -29,6 +29,7 @@ func (g *Generator) Generate(
 	typeNames []string,
 	nameFormat string,
 	marshalField string,
+	includeZero bool,
 ) ([]byte, error) {
 	var enums []enumInfo
 
@@ -63,6 +64,7 @@ func (g *Generator) Generate(
 			Instances:    resolution.Instances,
 			CaseFormat:   nameFormat,
 			GenerateVars: resolution.GenerateVars,
+			IncludeZero:  includeZero,
 			MarshalField: marshalField,
 			StructFields: typeSpec.Fields,
 		})
