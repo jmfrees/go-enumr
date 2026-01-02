@@ -4,13 +4,19 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/jmfrees/go-enumr.svg)](https://pkg.go.dev/github.com/jmfrees/go-enumr)
 [![CI](https://github.com/jmfrees/go-enumr/actions/workflows/ci.yml/badge.svg)](https://github.com/jmfrees/go-enumr/actions/workflows/ci.yml)
 
-`go-enumr` is a code generation tool for creating **Rich Enums** in Go.
+> **R**ich enums for Go.
+
+`go-enumr` is a code generation tool for creating **Rich Enums** in Go. The name is a nod to both **R**ich enums and the Go convention of agent nouns (like `Stringer`)—it's the tool that makes your types work as enums.
 
 Unlike standard Go enums (which are just integers), `go-enumr` allows you to use **structs** as enums. This enables you to bundle associated data—like labels, database IDs, configuration values, or color codes—directly with your enum identity.
 
-## Why Struct Enums?
+## Why Rich Enums?
 
-Standard Go enums are great for simple flags:
+A **Rich Enum** is an enumerated type where each variant carries its own immutable data. Instead of scattering your logic across multiple `switch` statements or lookup maps, you encapsulate the data within the enum value itself.
+
+### The Problem with Standard Enums
+
+Standard Go enums are great for simple flags, but they fall short when you need associated data:
 
 ```go
 // Standard Go Enum
