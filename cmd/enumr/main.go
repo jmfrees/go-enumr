@@ -26,8 +26,13 @@ func main() {
 		"",
 		"output file name or directory (default: dir/<type>_enum.go)",
 	)
-	marshalField := flag.String("marshal-field", "", "field to use for marshaling (String/MarshalText)")
+	marshalField := flag.String(
+		"marshal-field",
+		"",
+		"field to use for marshaling (String/MarshalText)",
+	)
 	zero := flag.Bool("zero", false, "allow zero value (empty string) during parsing")
+	dryRun := flag.Bool("dry-run", false, "perform a trial run with no changes made")
 
 	flag.Parse()
 
@@ -92,6 +97,17 @@ func main() {
 
 	// Determine output filename
 	outFileName := enumr.GetOutputFilename(pkg.Dir, targetTypes[0], outputName)
+
+	if *dryRun {
+		logger.LogAttrs(
+			ctx,
+			slog.LevelInfo,
+			"Dry run enabled, no files written",
+			slog.String("file", outFileName),
+		)
+		fmt.Println(string(source))
+		return
+	}
 
 	// Write the generated source to a file
 	if err = os.WriteFile(outFileName, source, 0o644); err != nil {
