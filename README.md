@@ -142,6 +142,7 @@ The tool generates the following for your type:
   - `SNAKE_CASE`
   - `Title Case`
 - `-output`: (Optional) Output file name or directory. Defaults to `<type>_enum.go` in the package directory.
+- `-zero`: (Optional) Allow the zero value (empty string) to be parsed as a valid enum value. Useful for optional fields that default to the zero value.
 
 ## Best Practices
 

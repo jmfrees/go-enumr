@@ -36,6 +36,10 @@ func Parse{{.TypeName}}(text string) ({{.TypeName}}, error) {
 {{printf "\n\t"}}case {{ if $marshalField }}{{ index .Fields $marshalField }}{{ else }}"{{transformName .Name $format}}"{{ end }}:
 		return {{.Name}}, nil
 {{- end}}
+{{- if .IncludeZero }}
+	case "":
+		return {{.TypeName}}{}, nil
+{{- end }}
 	default:
 		return {{.TypeName}}{}, fmt.Errorf("unknown enum value: %q", text)
 	}

@@ -27,6 +27,7 @@ func main() {
 		"output file name or directory (default: dir/<type>_enum.go)",
 	)
 	marshalField := flag.String("marshal-field", "", "field to use for marshaling (String/MarshalText)")
+	zero := flag.Bool("zero", false, "allow zero value (empty string) during parsing")
 
 	flag.Parse()
 
@@ -78,7 +79,7 @@ func main() {
 
 	// Process the loaded package and files
 	generator := enumr.NewGenerator(logger)
-	source, err := generator.Generate(ctx, pkg, targetTypes, nameFormat, *marshalField)
+	source, err := generator.Generate(ctx, pkg, targetTypes, nameFormat, *marshalField, *zero)
 	if err != nil {
 		logger.ErrorContext(ctx, "Error processing file", "error", err)
 		os.Exit(1)
