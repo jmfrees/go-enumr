@@ -28,7 +28,7 @@ func (g *Generator) Generate(
 	typeNames []string,
 	nameFormat string,
 	output string,
-	nameField string,
+	marshalField string,
 ) error {
 	var enums []enumInfo
 
@@ -45,14 +45,14 @@ func (g *Generator) Generate(
 			return err
 		}
 
-		// Validate that if nameField is specified, all instances have it
-		if nameField != "" {
+		// Validate that if marshalField is specified, all instances have it
+		if marshalField != "" {
 			for _, instance := range resolution.Instances {
-				if _, ok := instance.Fields[nameField]; !ok {
+				if _, ok := instance.Fields[marshalField]; !ok {
 					return fmt.Errorf(
 						"instance %s does not have field %q",
 						instance.Name,
-						nameField,
+						marshalField,
 					)
 				}
 			}
@@ -63,7 +63,7 @@ func (g *Generator) Generate(
 			Instances:    resolution.Instances,
 			CaseFormat:   nameFormat,
 			GenerateVars: resolution.GenerateVars,
-			NameField:    nameField,
+			MarshalField: marshalField,
 			StructFields: typeSpec.Fields,
 		})
 	}

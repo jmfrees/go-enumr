@@ -16,7 +16,7 @@ type enumInfo struct {
 	Instances    []instanceData
 	CaseFormat   string
 	GenerateVars bool
-	NameField    string
+	MarshalField string
 	StructFields []fieldInfo
 }
 
