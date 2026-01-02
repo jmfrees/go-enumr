@@ -1,5 +1,9 @@
 # go-enumr
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/jmfrees/go-enumr)](https://goreportcard.com/report/github.com/jmfrees/go-enumr)
+[![Go Reference](https://pkg.go.dev/badge/github.com/jmfrees/go-enumr.svg)](https://pkg.go.dev/github.com/jmfrees/go-enumr)
+[![CI](https://github.com/jmfrees/go-enumr/actions/workflows/ci.yml/badge.svg)](https://github.com/jmfrees/go-enumr/actions/workflows/ci.yml)
+
 `go-enumr` is a code generation tool for creating **Rich Enums** in Go.
 
 Unlike standard Go enums (which are just integers), `go-enumr` allows you to use **structs** as enums. This enables you to bundle associated data—like labels, database IDs, configuration values, or color codes—directly with your enum identity.
@@ -37,7 +41,43 @@ var (
 
 `go-enumr` automates the boilerplate needed to make these structs behave like proper enums, generating `String()`, `MarshalText()`, `UnmarshalText()`, and helper functions like `Values()` and `Parse()`.
 
+## When to use go-enumr
+
+**Use `go-enumr` when:**
+
+- Your enum variants have associated data (labels, config, database IDs).
+- You want to keep that data co-located with the definition.
+- You need to look up enum instances by their fields (e.g., find the status with ID 5).
+
+**Use `stringer` or `go-enum` when:**
+
+- You just need a simple list of names (nominal enums).
+- You don't have any extra data attached to your enum values.
+- You are fine with using `iota` or simple underlying types (int/string).
+
 ## Installation
+
+### Go 1.24+ (Recommended)
+
+You can track `go-enumr` as a tool dependency in your `go.mod` file:
+
+```bash
+go get -tool github.com/jmfrees/go-enumr/cmd/enumr
+```
+
+Then run it via `go tool`:
+
+```bash
+go tool enumr -type=Method
+```
+
+Or in your `//go:generate` directive:
+
+```go
+//go:generate go tool enumr -type=Method
+```
+
+### Go install (Global)
 
 ```bash
 go install github.com/jmfrees/go-enumr/cmd/enumr@latest
@@ -88,20 +128,22 @@ var (
 ```
 
 **Syntax Rules:**
-*   `Key:Value` sets a field (e.g., `Code:CC`).
-*   `Key:"Value with spaces"` sets a string field with spaces.
-*   `Key:true` sets a boolean field (e.g., `IsCredit:true`).
-*   `Key:"[]string{\"a\", \"b\"}"` sets complex types (slices, structs) by quoting the Go syntax.
-*   Fields not specified default to their zero value.
+
+- `Key:Value` sets a field (e.g., `Code:CC`).
+- `Key:"Value with spaces"` sets a string field with spaces.
+- `Key:true` sets a boolean field (e.g., `IsCredit:true`).
+- `Key:"[]string{\"a\", \"b\"}"` sets complex types (slices, structs) by quoting the Go syntax.
+- Fields not specified default to their zero value.
 
 ### 2. Manual Mode
 
 If you need complex initialization (e.g., function calls, external imports) or want to document individual instances, you can define the variables yourself.
 
 **When to use Manual Mode:**
-*   You need to use functions like `time.Now()`.
-*   You need to import other packages.
-*   You want to add godoc comments to specific enum instances.
+
+- You need to use functions like `time.Date()`.
+- You need to import other packages.
+- You want to add godoc comments to specific enum instances.
 
 ```go
 package payment
@@ -114,7 +156,7 @@ type Method struct {
 }
 
 var (
-    CreditCard = Method{"CC", time.Now()}
+    CreditCard = Method{"CC", time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)}
 )
 ```
 
@@ -147,6 +189,25 @@ The tool generates the following for your type:
 ## Best Practices
 
 Since Go structs cannot be `const`, these enums are defined as `var`. While technically mutable, the convention is to treat them as immutable constants.
+
+## Inspiration
+
+This project is inspired by the excellent work of:
+
+- [stringer](https://pkg.go.dev/golang.org/x/tools/cmd/stringer): The official Go tool for generating `String()` methods.
+- [go-enum](https://github.com/abice/go-enum): A powerful enum generator that supports parsing from comments.
+
+`go-enumr` builds on these ideas but focuses specifically on the "Rich Enum" pattern, where the enum value itself is a struct containing data, rather than just an integer or string.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1.  Fork the repository.
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  Push to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a Pull Request.
 
 ## License
 
