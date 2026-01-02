@@ -6,7 +6,7 @@ import (
 	"fmt"
 )
 
-// String converts the enum value to its corresponding name field.
+// String converts the enum value to its corresponding marshal field.
 func (t MyEnum) String() string {
 	switch t {
 	case ValueOne:

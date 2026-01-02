@@ -7,7 +7,7 @@ import (
 )
 {{range .Enums}}
 {{- $typeName := .TypeName}}
-{{- $nameField := .NameField}}
+{{- $marshalField := .MarshalField}}
 {{- $structFields := .StructFields}}
 {{- if .GenerateVars}}
 var ( {{- range .Instances -}}
@@ -16,12 +16,12 @@ var ( {{- range .Instances -}}
 )
 {{end}}
 {{- $format := .CaseFormat}}
-// String converts the enum value to its corresponding name field.
+// String converts the enum value to its corresponding marshal field.
 func (t {{.TypeName}}) String() string {
 	switch t { {{- range .Instances -}}
 {{printf "\n\t"}}case {{.Name}}:
-{{- if $nameField }}
-		return {{ index .Fields $nameField }}
+{{- if $marshalField }}
+		return {{ index .Fields $marshalField }}
 {{- else }}
 		return "{{transformName .Name $format}}"
 {{- end }}
@@ -39,7 +39,7 @@ func (t {{.TypeName}}) MarshalText() (text []byte, err error) {
 func (t *{{.TypeName}}) UnmarshalText(text []byte) error {
 	value := string(text)
 	switch value { {{- range .Instances -}}
-{{printf "\n\t"}}case {{ if $nameField }}{{ index .Fields $nameField }}{{ else }}"{{transformName .Name $format}}"{{ end }}:
+{{printf "\n\t"}}case {{ if $marshalField }}{{ index .Fields $marshalField }}{{ else }}"{{transformName .Name $format}}"{{ end }}:
 		*t = {{.Name}}
 {{- end}}
 	default:
